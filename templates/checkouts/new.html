@@ -1,0 +1,132 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<div class="wrapper">
+  <div class="checkout container">
+
+    <header>
+      <h1>Buy The Thing</h1>
+      <p>
+        Really nice Thing, you should buy it
+      </p>
+      <h2>Only $299.99<small style="color: grey">(&euro;267.67)</small></h2>
+    </header>
+
+    <form id="payment-form" method="post" action="/checkouts">
+          <label for="currency">
+            <span class="">Currency</span>
+            <div class="input-wrapper currency-wrapper">
+              <select id="currency" name="currency">
+                <option value="USD" selected="selected">$ USD $</option>
+                <option value="EUR">&euro; EURO &euro;</option>
+              </select>
+            </div>
+          </label>
+          <label for="amount">
+            <span class="">Amount</span>
+            <div class="input-wrapper amount-wrapper">
+              <input id="amount" name="amount" type="number" min="1" placeholder="Amount" value="1">
+            </div>
+          </label>
+      <section>
+        <div class="bt-drop-in-wrapper">
+          <div id="bt-dropin"></div>
+        </div>
+          <input name="price_USD" type="hidden" value="299.99">
+          <input name="price_EUR" type="hidden" value="267.67">
+        </section>
+
+      <section>
+        <h3>Enter your card info</h3>
+<!--           <label for="card_holder">
+            <span class="">Card Holder Name</span>
+            <div class="input-wrapper card_holder-wrapper">
+              <input id="card_holder" name="card_holder" type="text" min="1" placeholder="card_holder" value="MR X">
+            </div>
+          </label> -->
+          <input type="hidden" name="tco_token" id="tco_token"/>
+
+          <label for="card_number">
+            <span class="">card_number</span>
+            <div class="input-wrapper card_number-wrapper">
+              <input id="card_number" type="text" min="1" placeholder="card_number" value="4000000000000002">
+            </div>
+          </label>
+        
+          <label for="card_exp_month">
+            <span class="">Exp Month</span>
+            <div class="input-wrapper">
+              <select id="card_exp_month" name="card_exp_month">
+                <option value="1" selected="selected">Jan</option>
+                <option value="2">Feb</option>
+              </select>
+            </div>
+          </label>
+          <label for="card_exp_year">
+            <span class="">Exp Year</span>
+            <div class="input-wrapper">
+              <select id="card_exp_year" name="card_exp_year">
+                <option value="2017">2017 (invalid)</option>
+                <option value="2022">2022</option>
+              </select>
+            </div>
+          </label>
+          
+          <label for="card_cvv">
+            <span class="">Card CVV</span>
+            <div class="input-wrapper card_cvv-wrapper">
+              <input id="card_cvv" type="text" min="1" placeholder="card_cvv" value="777">
+            </div>
+          </label>
+        
+      </section>
+      <p></p>
+      <button class="button" type="submit"><span>Checkout</span></button>
+    </form>
+
+    <div id="globalPayContainer" style="height:600px;"></div>
+
+  </div>
+</div>
+
+<script type="text/javascript" src="https://www.2checkout.com/checkout/api/2co.min.js"></script>
+<script>
+$(document).ready(function(){
+  
+  $("#payment-form").submit(function(){
+    // var data = $(this).serialize();
+    var args = {
+        sellerId: "{{ seller_id }}",
+        publishableKey: "{{ public_key }}",
+        ccNo: $("#card_number").val(),
+        cvv: $("#card_cvv").val(),
+        expMonth: $("#card_exp_month").val(),
+        expYear: $("#card_exp_year").val()
+    };
+
+    TCO.requestToken(successCallback, errorCallback, args);
+
+    console.log("FORM DATA", args);
+    return false;
+
+  });
+
+  function successCallback(data) {
+    console.log("Success CB", data);
+    $("#tco_token").val(data.response.token.token);
+
+    document.getElementById("payment-form").submit();
+
+  }
+
+  function errorCallback() {
+    console.log("Error CB", arguments);
+  }
+
+  TCO.loadPubKey('sandbox', function() {
+      console.log("load pub key", arguments);
+  })
+
+});
+</script>
+{% endblock %}
